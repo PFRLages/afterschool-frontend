@@ -118,8 +118,24 @@ new Vue({
             lesson.space += count;
         },
 
-        // Called on every keystroke in the search box (wired to the backend next)
+        // Called on every keystroke: asks the backend for matching lessons
         searchLessons: function () {
+            fetch(apiUrl + "/search?q=" + encodeURIComponent(this.searchQuery))
+                .then(function (response) {
+                    return response.json();
+                })
+                .then((data) => {
+                    // The database does not know about unconfirmed cart items,
+                    // so subtract any spaces currently held in the cart
+                    data.forEach((lesson) => {
+                        const inCart = this.cart.filter(function (id) { return id === lesson._id; }).length;
+                        lesson.space -= inCart;
+                    });
+                    this.lessons = data;
+                })
+                .catch(function (err) {
+                    console.error("Search failed:", err);
+                });
         },
 
         // Switches between the lessons page and the cart page
