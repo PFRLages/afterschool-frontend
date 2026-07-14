@@ -9,6 +9,7 @@ new Vue({
         lessons: [],          // all lessons fetched from the backend
         cart: [],             // lesson IDs added to the cart (duplicates = quantity)
         showCart: false,      // toggles between the lessons page and the cart page
+        searchQuery: "",      // current text in the search box
         sortBy: "topic",
         sortOrder: "asc",
         order: {              // checkout form fields
@@ -115,6 +116,10 @@ new Vue({
             const count = this.cart.filter(function (id) { return id === lesson._id; }).length;
             this.cart = this.cart.filter(function (id) { return id !== lesson._id; });
             lesson.space += count;
+        },
+
+        // Called on every keystroke in the search box (wired to the backend next)
+        searchLessons: function () {
         },
 
         // Switches between the lessons page and the cart page
