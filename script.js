@@ -16,7 +16,9 @@ new Vue({
             name: "",
             phone: ""
         },
-        orderSubmitted: false // shows the confirmation message after checkout
+        orderSubmitted: false,// shows the confirmation message after checkout
+        failedImages: [],     // ids of lessons whose image failed to load
+
     },
 
     // Fetch the lessons from the API when the page loads
@@ -90,7 +92,7 @@ new Vue({
         // Checkout is allowed only when both fields are valid and the cart is not empty
         canCheckout: function () {
             return this.nameValid && this.phoneValid && this.cart.length > 0;
-        }
+        },
     },
 
     methods: {
@@ -182,6 +184,12 @@ new Vue({
                 .catch(function (err) {
                     console.error("Failed to submit order:", err);
                 });
-        }
+        },
+
+        // Remembers that a lesson's image could not be loaded,
+        // so a fallback icon is shown instead
+        imageFailed: function (lessonId) {
+            this.failedImages.push(lessonId);
+        },
     }
 });
