@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +12,6 @@
     <!-- Custom styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body class="bg-light">
 
     <div id="app">
@@ -37,18 +35,19 @@
             <!-- ==================== LESSONS PAGE ==================== -->
             <div v-if="!showCart">
 
-                <!-- Sorting controls -->
-                <div class="row mb-4">
-                    <!-- Search bar: filters lessons as the user types -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                <input type="text" class="form-control" v-model="searchQuery" @input="searchLessons"
-                                    placeholder="Search by subject, location, price or spaces...">
-                            </div>
+                <!-- Search bar: filters lessons as the user types -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" class="form-control" v-model="searchQuery" @input="searchLessons"
+                                   placeholder="Search by subject, location, price or spaces...">
                         </div>
                     </div>
+                </div>
+
+                <!-- Sorting controls -->
+                <div class="row mb-4">
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Sort by</label>
                         <select class="form-select" v-model="sortBy">
@@ -67,39 +66,44 @@
                     </div>
                 </div>
 
-                <!-- message when the search finds nothing -->
-                <div v-if="lessons.length === 0" class="alert alert-info">
+                <!-- Shown while the lessons are being fetched
+                     (the free server may take up to a minute to wake up) -->
+                <div v-if="loading" class="text-center my-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3 text-muted">Loading lessons... the server may take up to a minute to wake up.</p>
+                </div>
+
+                <!-- Friendly message when the search finds nothing -->
+                <div v-if="!loading && lessons.length === 0" class="alert alert-info">
                     <i class="fa-solid fa-circle-info"></i> No lessons match your search.
                 </div>
 
                 <!-- Lessons grid -->
-                <div class="row">
+                <div class="row" v-if="!loading">
                     <div class="col-sm-6 col-md-4 col-lg-3 mb-4" v-for="lesson in sortedLessons" :key="lesson._id">
                         <div class="card h-100 shadow-sm">
                             <!-- Lesson image, with a Font Awesome fallback icon if it fails to load -->
-                            <img v-if="!failedImages.includes(lesson._id)" :src="apiUrl + '/' + lesson.image"
-                                class="card-img-top p-3" :alt="lesson.topic" style="height: 160px; object-fit: contain;"
-                                @error="imageFailed(lesson._id)">
-                            <div v-else class="d-flex align-items-center justify-content-center bg-light"
-                                style="height: 160px;">
+                            <img v-if="!failedImages.includes(lesson._id)"
+                                 :src="apiUrl + '/' + lesson.image" class="card-img-top p-3" :alt="lesson.topic"
+                                 style="height: 160px; object-fit: contain;"
+                                 @error="imageFailed(lesson._id)">
+                            <div v-else class="d-flex align-items-center justify-content-center bg-light" style="height: 160px;">
                                 <i class="fa-solid fa-graduation-cap fa-4x text-secondary"></i>
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ lesson.topic }}</h5>
-                                <p class="card-text mb-1"><i class="fa-solid fa-location-dot"></i> {{ lesson.location }}
-                                </p>
+                                <p class="card-text mb-1"><i class="fa-solid fa-location-dot"></i> {{ lesson.location }}</p>
                                 <p class="card-text mb-1"><i class="fa-solid fa-tag"></i> £{{ lesson.price }}</p>
                                 <p class="card-text">
                                     <i class="fa-solid fa-users"></i>
-                                    <!-- Warn the user when a lesson is nearly or fully booked -->
+                                    <!-- Warn the user when a lesson is fully booked -->
                                     <span v-if="lesson.space > 0">{{ lesson.space }} spaces left</span>
                                     <span v-else class="text-danger fw-bold">Fully booked</span>
                                 </p>
                             </div>
                             <div class="card-footer bg-white border-0 pb-3">
                                 <!-- Disabled when there are no spaces left -->
-                                <button class="btn btn-primary w-100" @click="addToCart(lesson)"
-                                    :disabled="lesson.space === 0">
+                                <button class="btn btn-primary w-100" @click="addToCart(lesson)" :disabled="lesson.space === 0">
                                     <i class="fa-solid fa-cart-plus"></i> Add to Cart
                                 </button>
                             </div>
@@ -124,12 +128,10 @@
                 <!-- One row per lesson, grouped with quantity and subtotal -->
                 <div class="card mb-3 shadow-sm" v-for="group in groupedCart" :key="group.lesson._id">
                     <div class="card-body d-flex align-items-center">
-                        <img :src="apiUrl + '/' + group.lesson.image" :alt="group.lesson.topic"
-                            style="width: 60px; height: 60px; object-fit: contain;" class="me-3">
+                        <img :src="apiUrl + '/' + group.lesson.image" :alt="group.lesson.topic" style="width: 60px; height: 60px; object-fit: contain;" class="me-3">
                         <div class="flex-grow-1">
                             <h5 class="mb-1">{{ group.lesson.topic }}</h5>
-                            <small class="text-muted">{{ group.lesson.location }} — £{{ group.lesson.price }}
-                                each</small>
+                            <small class="text-muted">{{ group.lesson.location }} — £{{ group.lesson.price }} each</small>
                         </div>
                         <div class="text-center me-4">
                             <span class="badge bg-secondary fs-6">x{{ group.quantity }}</span>
@@ -162,18 +164,18 @@
                         <div class="row">
                             <div class="col-md-5 mb-3">
                                 <label class="form-label">Name</label>
-                                <!-- Letters only; Bootstrap turns the field green/red as the user types -->
+                                <!-- Letters only; the field turns green/red as the user types -->
                                 <input type="text" class="form-control" v-model="order.name"
-                                    :class="{ 'is-valid': nameValid, 'is-invalid': order.name && !nameValid }"
-                                    placeholder="e.g. John Smith">
+                                       :class="{ 'is-valid': nameValid, 'is-invalid': order.name && !nameValid }"
+                                       placeholder="e.g. John Smith">
                                 <div class="invalid-feedback">Name must contain letters only.</div>
                             </div>
                             <div class="col-md-5 mb-3">
                                 <label class="form-label">Phone</label>
                                 <!-- Digits only -->
                                 <input type="text" class="form-control" v-model="order.phone"
-                                    :class="{ 'is-valid': phoneValid, 'is-invalid': order.phone && !phoneValid }"
-                                    placeholder="e.g. 07123456789">
+                                       :class="{ 'is-valid': phoneValid, 'is-invalid': order.phone && !phoneValid }"
+                                       placeholder="e.g. 07123456789">
                                 <div class="invalid-feedback">Phone must contain numbers only.</div>
                             </div>
                             <div class="col-md-2 mb-3 d-flex align-items-end">
@@ -188,6 +190,7 @@
 
             </div>
         </div>
+
         <!-- Page footer -->
         <footer class="bg-dark text-light text-center py-3 mt-5">
             <small>After School Classes &copy; 2026 — Book activities for your kids in a few clicks</small>
@@ -199,5 +202,4 @@
     <!-- Our application logic -->
     <script src="script.js"></script>
 </body>
-
 </html>

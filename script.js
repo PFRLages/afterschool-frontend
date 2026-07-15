@@ -1,3 +1,4 @@
+
 // Base URL of the Express API (deployed on Render)
 const apiUrl = "https://afterschool-backend-5ud5.onrender.com";
 
@@ -7,6 +8,7 @@ new Vue({
     data: {
         apiUrl: apiUrl,
         lessons: [],          // all lessons fetched from the backend
+        loading: true,        // true while the initial lessons request is in progress
         cart: [],             // lesson IDs added to the cart (duplicates = quantity)
         showCart: false,      // toggles between the lessons page and the cart page
         searchQuery: "",      // current text in the search box
@@ -16,9 +18,8 @@ new Vue({
             name: "",
             phone: ""
         },
-        orderSubmitted: false,// shows the confirmation message after checkout
-        failedImages: [],     // ids of lessons whose image failed to load
-
+        orderSubmitted: false, // shows the confirmation message after checkout
+        failedImages: []       // ids of lessons whose image failed to load
     },
 
     // Fetch the lessons from the API when the page loads
@@ -29,9 +30,11 @@ new Vue({
             })
             .then((data) => {
                 this.lessons = data;
+                this.loading = false;
             })
-            .catch(function (err) {
+            .catch((err) => {
                 console.error("Failed to load lessons:", err);
+                this.loading = false;
             });
     },
 
@@ -92,7 +95,7 @@ new Vue({
         // Checkout is allowed only when both fields are valid and the cart is not empty
         canCheckout: function () {
             return this.nameValid && this.phoneValid && this.cart.length > 0;
-        },
+        }
     },
 
     methods: {
@@ -120,6 +123,12 @@ new Vue({
             lesson.space += count;
         },
 
+        // Switches between the lessons page and the cart page
+        toggleCart: function () {
+            this.showCart = !this.showCart;
+            this.orderSubmitted = false;
+        },
+
         // Called on every keystroke: asks the backend for matching lessons
         searchLessons: function () {
             fetch(apiUrl + "/search?q=" + encodeURIComponent(this.searchQuery))
@@ -138,12 +147,6 @@ new Vue({
                 .catch(function (err) {
                     console.error("Search failed:", err);
                 });
-        },
-
-        // Switches between the lessons page and the cart page
-        toggleCart: function () {
-            this.showCart = !this.showCart;
-            this.orderSubmitted = false;
         },
 
         // Sends the order to the backend, then updates each lesson's spaces in the database
@@ -190,6 +193,6 @@ new Vue({
         // so a fallback icon is shown instead
         imageFailed: function (lessonId) {
             this.failedImages.push(lessonId);
-        },
+        }
     }
 });
