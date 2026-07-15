@@ -1,5 +1,5 @@
-// Base URL of the Express API (will be changed to the live URL when deployed)
-const apiUrl = "http://localhost:3000";
+// Base URL of the Express API (deployed on Render)
+const apiUrl = "https://afterschool-backend-5ud5.onrender.com";
 
 new Vue({
     el: "#app",
