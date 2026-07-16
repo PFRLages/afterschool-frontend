@@ -87,9 +87,9 @@ new Vue({
             return /^[A-Za-z ]+$/.test(this.order.name);
         },
 
-        // Phone must contain digits only (7 to 15 of them)
+        // Phone must be a valid UK number: starts with 0, 10 or 11 digits in total
         phoneValid: function () {
-            return /^[0-9]{7,15}$/.test(this.order.phone);
+            return /^0\d{9,10}$/.test(this.order.phone);
         },
 
         // Checkout is allowed only when both fields are valid and the cart is not empty
