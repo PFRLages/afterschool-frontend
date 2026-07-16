@@ -19,3 +19,9 @@ A single-page web app for booking after-school classes and activities, built wit
 
 ## Credits
 Lesson icons generated with an AI image tool specifically for this project.
+
+## Links
+- **Frontend GitHub repository:** https://github.com/PFRLages/afterschool-frontend
+- **Live app (GitHub Pages):** https://pfrlages.github.io/afterschool-frontend/
+- **Backend GitHub repository:** https://github.com/PFRLages/afterschool-backend
+- **Live API — all lessons (Render):** https://afterschool-backend-5ud5.onrender.com/lessons
