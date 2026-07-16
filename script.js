@@ -131,11 +131,17 @@ new Vue({
 
         // Called on every keystroke: asks the backend for matching lessons
         searchLessons: function () {
-            fetch(apiUrl + "/search?q=" + encodeURIComponent(this.searchQuery))
+            const query = this.searchQuery;
+            fetch(apiUrl + "/search?q=" + encodeURIComponent(query))
                 .then(function (response) {
                     return response.json();
                 })
                 .then((data) => {
+                    // Ignore this response if the search box has changed since
+                    // the request was sent (an outdated response arriving late)
+                    if (query !== this.searchQuery) {
+                        return;
+                    }
                     // The database does not know about unconfirmed cart items,
                     // so subtract any spaces currently held in the cart
                     data.forEach((lesson) => {
